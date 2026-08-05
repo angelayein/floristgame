@@ -46,7 +46,7 @@ namespace FloristGame.Gameplay
 
         private Dictionary<string, FlowerSpecies> _speciesById;
         private List<OccasionProfile> _occasionProfiles;
-        private Random _rng;
+        private System.Random _rng;
 
         private void Awake()
         {
@@ -57,7 +57,7 @@ namespace FloristGame.Gameplay
             }
             Instance = this;
 
-            _rng = new Random();
+            _rng = new System.Random();
             _speciesById = flowerCatalog.ToDictionary(f => f.id, f => f.ToCoreSpecies());
             _occasionProfiles = occasionCatalog.Select(o => o.ToCoreProfile()).ToList();
 
