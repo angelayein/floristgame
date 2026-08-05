@@ -1,0 +1,15 @@
+{
+    "name": "FloristGame.Gameplay",
+    "rootNamespace": "FloristGame",
+    "references": [
+        "FloristGame.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
