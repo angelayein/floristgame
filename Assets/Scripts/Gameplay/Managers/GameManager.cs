@@ -25,6 +25,9 @@ namespace FloristGame.Gameplay
         public List<FlowerDefinition> flowerCatalog = new List<FlowerDefinition>();
         public List<OccasionDefinition> occasionCatalog = new List<OccasionDefinition>();
 
+        [Tooltip("Optional pool of customer characters. If empty, customers get a generic name and no portrait.")]
+        public List<CustomerArchetype> archetypeCatalog = new List<CustomerArchetype>();
+
         [Header("Economy")]
         public float startingCash = 200f;
         public int startingStemsPerSpecies = 20;
@@ -35,8 +38,9 @@ namespace FloristGame.Gameplay
         public EconomyLedger Economy { get; private set; }
         public DayCycleController DayCycle { get; private set; }
         public CustomerRequest CurrentRequest { get; private set; }
+        public CustomerArchetype CurrentArchetype { get; private set; }
 
-        public event Action<CustomerRequest> OnCustomerArrived;
+        public event Action<CustomerRequest, CustomerArchetype> OnCustomerArrived;
         public event Action<ScoreBreakdown> OnArrangementEvaluated;
         public event Action<HaggleResult> OnHaggleRoundResolved;
         public event Action<float, ScoreBreakdown> OnSaleCompleted; // finalPrice, breakdown
@@ -97,9 +101,12 @@ namespace FloristGame.Gameplay
 
         public void SpawnNextCustomer()
         {
+            CurrentArchetype = PickArchetype();
+            string customerName = CurrentArchetype != null ? CurrentArchetype.archetypeName : GenerateFallbackName();
+
             var tier = RequestGenerator.TierForReputation(Reputation.Reputation);
-            CurrentRequest = RequestGenerator.Generate(_rng, _occasionProfiles, _speciesById.Values.ToList(), tier, GenerateCustomerName());
-            OnCustomerArrived?.Invoke(CurrentRequest);
+            CurrentRequest = RequestGenerator.Generate(_rng, _occasionProfiles, _speciesById.Values.ToList(), tier, customerName);
+            OnCustomerArrived?.Invoke(CurrentRequest, CurrentArchetype);
         }
 
         // Pure evaluation - does not charge, does not mutate reputation. Call
@@ -139,11 +146,19 @@ namespace FloristGame.Gameplay
             SpawnNextCustomer();
         }
 
-        private static readonly string[] CustomerNames =
+        private CustomerArchetype PickArchetype()
+        {
+            if (archetypeCatalog == null || archetypeCatalog.Count == 0) return null;
+            return archetypeCatalog[_rng.Next(archetypeCatalog.Count)];
+        }
+
+        // Used only when archetypeCatalog is empty, so the game is still
+        // playable before any customer characters have been authored.
+        private static readonly string[] FallbackNames =
         {
             "Alex", "Jordan", "Sam", "Riley", "Morgan", "Taylor", "Casey", "Jamie", "Drew", "Quinn"
         };
 
-        private string GenerateCustomerName() => CustomerNames[_rng.Next(CustomerNames.Length)];
+        private string GenerateFallbackName() => FallbackNames[_rng.Next(FallbackNames.Length)];
     }
 }
