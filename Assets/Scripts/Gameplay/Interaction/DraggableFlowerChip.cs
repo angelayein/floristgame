@@ -15,6 +15,10 @@ namespace FloristGame.Gameplay
         public FlowerDefinition flower;
         public Image icon;
 
+        [Header("Optional stock display")]
+        public Text stockCountLabel;
+        public Image freshnessFill; // Image Type = Filled; fillAmount driven by average freshness (0..1)
+
         private RectTransform _rectTransform;
         private CanvasGroup _canvasGroup;
         private Canvas _rootCanvas;
@@ -26,7 +30,31 @@ namespace FloristGame.Gameplay
             _rectTransform = GetComponent<RectTransform>();
             _canvasGroup = GetComponent<CanvasGroup>();
             _rootCanvas = GetComponentInParent<Canvas>();
+            RefreshIcon();
+        }
 
+        // Used by StockTraySpawner when instantiating chips from the
+        // catalog at runtime rather than hand-placing one per species.
+        public void SetFlower(FlowerDefinition newFlower)
+        {
+            flower = newFlower;
+            RefreshIcon();
+        }
+
+        public void RefreshStock(int availableStems, float freshness)
+        {
+            if (stockCountLabel != null)
+            {
+                stockCountLabel.text = availableStems.ToString();
+            }
+            if (freshnessFill != null)
+            {
+                freshnessFill.fillAmount = freshness;
+            }
+        }
+
+        private void RefreshIcon()
+        {
             if (icon != null && flower != null && flower.icon != null)
             {
                 icon.sprite = flower.icon;
